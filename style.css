@@ -1,0 +1,89 @@
+/* === FALLOUT / PIP-BOY THEME === */
+@import url('https://fonts.googleapis.com/css2?family=VT323&display=swap');
+
+:root {
+    --pip-boy-green: #27f877;
+    --pip-boy-green-dark: #195228;
+    --pip-boy-bg: #151a14;
+    --pip-boy-font: 'VT323', monospace;
+}
+
+/* === GENERAL & CRT SCREEN EFFECT === */
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+    background: #000;
+    font-family: var(--pip-boy-font);
+    color: var(--pip-boy-green);
+    text-shadow: 0 0 5px var(--pip-boy-green);
+    animation: text-flicker 0.05s infinite;
+}
+.screen-bezel {
+    position: fixed;
+    top: 2.5vh; left: 2.5vw;
+    width: 95vw; height: 95vh;
+    border: 3px solid var(--pip-boy-green-dark);
+    box-shadow: inset 0 0 40px #000, 0 0 20px #000;
+    border-radius: 40px;
+    padding: 25px;
+    background: var(--pip-boy-bg);
+    overflow: hidden;
+}
+.scanlines { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; background: repeating-linear-gradient(0deg, rgba(0,0,0,0.5) 0, rgba(0,0,0,0.5) 1px, transparent 1px, transparent 3px); }
+.screen-glow { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; border-radius: 40px; box-shadow: inset 0 0 80px var(--pip-boy-green-dark); }
+.bezel-text { position: absolute; color: var(--pip-boy-green-dark); font-size: 1.2rem; }
+.top-left { top: 10px; left: 40px; } .top-right { top: 10px; right: 40px; } .bottom-left { bottom: 10px; left: 40px; } .bottom-right { bottom: 10px; right: 40px; }
+
+/* === GAME CONTENT & STATES === */
+#game-content { width: 100%; height: 100%; }
+.game-overlay { display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 100; align-items: center; justify-content: center; flex-direction: column; }
+.state-pristine, .state-fixed { background: var(--pip-boy-bg); }
+.state-broken, .state-power-on, .state-tuning, .state-rebooting { background: #000; }
+.state-broken #power-outage-overlay, .state-power-on #no-signal-overlay, .state-tuning #signal-tuning-overlay, .state-rebooting #reboot-overlay { display: flex; }
+
+/* === "FIXED" WEBSITE STYLES === */
+#real-content { opacity: 0; transition: opacity 0.5s ease; width: 100%; height: 100%; overflow-y: auto; }
+.state-pristine #real-content, .state-fixed #real-content { opacity: 1; }
+header { border-bottom: 2px solid var(--pip-boy-green); padding: 10px; margin-bottom: 20px; font-size: 1.5rem; text-align: center; }
+.photo-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 15px; }
+.photo-grid img { border: 2px solid var(--pip-boy-green); padding: 5px; filter: grayscale(1) contrast(1.5) brightness(1.2); mix-blend-mode: multiply; background-color: var(--pip-boy-green); }
+.message-wall { display: grid; gap: 15px; }
+.message-card { border: 2px solid var(--pip-boy-green-dark); padding: 15px; }
+cite { display: block; margin-top: 10px; text-align: right; }
+
+/* === PUZZLE ELEMENT STYLES === */
+.terminal-text { text-align: center; width: 100%; padding: 40px; font-size: 1.8rem; line-height: 1.5; }
+/* Fuse Box */
+#fuse-box { border: 2px solid var(--pip-boy-green); padding: 10px; cursor: pointer; text-align: center; }
+.box-label { font-size: 1rem; }
+#fuse-switch { width: 40px; height: 70px; border: 2px solid var(--pip-boy-green); position: relative; top: 35px; background: var(--pip-boy-green-dark); transition: all 0.2s; }
+.state-power-on #fuse-switch { top: -35px; background: var(--pip-boy-green); }
+/* SVG Cable */
+#cable-path { fill: none; stroke: var(--pip-boy-green); stroke-width: 5; }
+#socket rect { fill: transparent; stroke: var(--pip-boy-green); stroke-width: 2; }
+#socket .port { fill: var(--pip-boy-green-dark); }
+#socket.active .port { fill: var(--pip-boy-green); }
+#plug-end rect { fill: var(--pip-boy-green); }
+/* Signal Tuning */
+#tuning-monitor { width: 80%; max-width: 800px; height: 200px; border: 2px solid var(--pip-boy-green); }
+#waveform-svg path { fill: none; stroke-width: 2; }
+#target-wave { stroke: var(--pip-boy-green-dark); }
+#user-wave { stroke: var(--pip-boy-green); text-shadow: 0 0 5px var(--pip-boy-green); }
+#tuning-controls { display: flex; gap: 30px; margin-top: 20px; }
+input[type="range"] { -webkit-appearance: none; appearance: none; width: 150px; height: 4px; background: var(--pip-boy-green-dark); outline: none; }
+input[type="range"]::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 20px; height: 20px; background: var(--pip-boy-green); border: 2px solid var(--pip-boy-green-dark); cursor: pointer; }
+/* Reboot Prompt */
+#reboot-prompt { border: 2px solid var(--pip-boy-green); padding: 30px; }
+#collected-clues { border: 1px solid var(--pip-boy-green-dark); padding: 10px; margin: 15px auto; }
+#password-input { background: var(--pip-boy-green-dark); border: 1px solid var(--pip-boy-green); color: var(--pip-boy-green); font-size: 1.5rem; padding: 10px; text-align: center; font-family: var(--pip-boy-font); }
+#reboot-button { background: var(--pip-boy-green); border: none; color: #000; font-size: 1.5rem; padding: 10px 20px; cursor: pointer; margin-top: 10px; font-family: var(--pip-boy-font); }
+#reboot-feedback.error { color: #f00; }
+
+/* === FINDABLE CLUES & FINALE === */
+.hidden-clue { position: absolute; font-size: 2rem; opacity: 0.2; animation: text-flicker 0.1s infinite; }
+#clue-1 { top: 20px; right: 40px; } #clue-2 { bottom: 25%; left: 25%; cursor: pointer; }
+.hidden-clue.found { opacity: 1; animation: none; color: var(--pip-boy-green); transform: scale(1.2); }
+#final-reveal-overlay { display: none; align-items: center; justify-content: center; }
+.final-title { font-size: 15vw; font-weight: 900; animation: text-flicker 0.1s infinite; }
+
+/* === ANIMATIONS === */
+@keyframes text-flicker { 0% { opacity: 1; } 50% { opacity: 0.8; } 100% { opacity: 1; } }

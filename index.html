@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ROBCO INDUSTRIES UNIFIED OPERATING SYSTEM</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body class="state-pristine">
+
+    <div class="screen-bezel">
+        <div class="scanlines"></div>
+        <div class="screen-glow"></div>
+        
+        <div class="bezel-text top-left">[ AV-1 ]</div>
+        <div class="bezel-text top-right">[ SYSTEM KERNEL ]</div>
+        <div class="bezel-text bottom-left">[ v2.0.5 ]</div>
+        <div class="bezel-text bottom-right">[ DAD-OS ]</div>
+
+        <div id="game-content">
+            
+            <div id="real-content">
+                <header><h1>BIRTHDAY MEMORY ARCHIVE</h1></header>
+                <main class="container">
+                    <h2>[ PHOTO LOG ]</h2>
+                    <div class="photo-grid">
+                        <img src="images/photo1.jpg" alt="A cool photo of dad"><img src="images/photo2.jpg" alt="Another cool photo"><img src="images/photo3.jpg" alt="A family photo"><img src="images/photo4.jpg" alt="A vintage photo">
+                    </div>
+                    <h2>[ INCOMING TRANSMISSIONS ]</h2>
+                    <div class="message-wall">
+                        <div class="message-card"><blockquote>Happy Birthday to the best dad in the world. So proud of you!</blockquote><cite>– Your Favourite Child</cite></div>
+                        <div class="message-card"><blockquote>Wishing you all the best on your big day. Let's get together for a pint soon.</blockquote><cite>- Your Best Mate</cite></div>
+                    </div>
+                </main>
+            </div>
+
+            <div id="power-outage-overlay" class="game-overlay">
+                <div class="terminal-text flicker">
+                    <p>SYSTEM FAILURE: MAIN POWER OFFLINE</p>
+                    <p>// REROUTE POWER AT JUNCTION BOX //</p>
+                </div>
+                <div id="fuse-box">
+                    <div class="box-label">J-BOX 111</div>
+                    <div id="fuse-switch"></div>
+                </div>
+                <div id="clue-1" class="hidden-clue">19</div>
+            </div>
+
+            <div id="no-signal-overlay" class="game-overlay">
+                <div class="terminal-text">
+                    <p>POWER RESTORED. AWAITING DISPLAY SIGNAL...</p>
+                    <p class="static-text"></p>
+                    <p>// DATA PORT CABLE DISCONNECTED. RECONNECT. //</p>
+                </div>
+                <svg id="cable-puzzle-svg" width="100%" height="100%"><g id="socket"><rect x="80%" y="40%" width="150" height="60" rx="0" /><rect class="port" x="calc(80% + 65)" y="calc(40% + 20)" width="20" height="20" /></g><path id="cable-path" /><g id="plug-end"><rect class="plug-body" x="-45" y="-15" width="90" height="30" /><rect class="plug-pin" x="45" y="-5" width="30" height="10" /></g></svg>
+                <div id="clue-2" class="hidden-clue">86</div>
+            </div>
+            
+            <div id="signal-tuning-overlay" class="game-overlay">
+                <div class="terminal-text"><p>SIGNAL ACQUIRED. UNSTABLE. CALIBRATE WAVEFORM.</p></div>
+                <div id="tuning-monitor"><svg id="waveform-svg" width="100%" height="100%"><path id="target-wave" /><path id="user-wave" /></svg></div>
+                <div id="tuning-controls">
+                    <div class="slider-group"><label for="frequency-slider">FREQ</label><input type="range" id="frequency-slider" min="1" max="100" value="25"></div>
+                    <div class="slider-group"><label for="amplitude-slider">AMP</label><input type="range" id="amplitude-slider" min="1" max="100" value="75"></div>
+                    <div class="slider-group"><label for="phase-slider">PHASE</label><input type="range" id="phase-slider" min="0" max="100" value="50"></div>
+                </div>
+            </div>
+            
+            <div id="reboot-overlay" class="game-overlay">
+                <div class="jumbled-content"></div>
+                <div class="reboot-prompt terminal-text">
+                    <p>MEMORY CORRUPTION DETECTED. ADMINISTRATIVE OVERRIDE REQUIRED.</p>
+                    <div id="collected-clues">CLUES FOUND: ???</div>
+                    <label for="password-input">PASSCODE:</label>
+                    <input type="text" id="password-input" autocomplete="off">
+                    <button id="reboot-button">> EXECUTE <</button>
+                    <p id="reboot-feedback"></p>
+                </div>
+            </div>
+
+            <div id="final-reveal-overlay" class="game-overlay">
+                <h1 class="final-title">BEST DAD</h1>
+            </div>
+        </div>
+    </div>
+    
+    <script src="script.js"></script>
+</body>
+</html>
