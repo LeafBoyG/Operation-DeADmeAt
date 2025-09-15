@@ -4,197 +4,239 @@
 const REBOOT_PASSWORD = "1986";
 const CLUE_1_TEXT = "19";
 const CLUE_2_TEXT = "86";
-const TARGET_WAVEFORM = {
-    frequency: 60,
-    amplitude: 75,
-    phase: 30,
-    tolerance: 5
-};
+const TARGET_FREQUENCY = { value: 72, tolerance: 4 };
+const HACKING_WORDS = [
+    "BIRTHDAY", "SYSTEMS", "TERMINAL", "COMPUTER", "OVERRIDE", 
+    "SECURITY", "DATABASE", "ARCHIVE", "MEMORIES", "HOLOTAPE",
+    "DRONFIELD", "SEPTEMBER", REBOOT_PASSWORD
+];
 // ===================================
 
-
-// --- DOM ELEMENT SELECTORS ---
+// --- DOM ELEMENT SELECTORS & STATE ---
 const body = document.body;
-const fuseBox = document.getElementById('fuse-box');
-const rebootButton = document.getElementById('reboot-button');
-const passwordInput = document.getElementById('password-input');
-const rebootFeedback = document.getElementById('reboot-feedback');
-const finalRevealOverlay = document.getElementById('final-reveal-overlay');
-const clue1 = document.getElementById('clue-1');
-const clue2 = document.getElementById('clue-2');
-const collectedCluesDisplay = document.getElementById('collected-clues');
-// SVG Cable Puzzle
-const svg = document.getElementById('cable-puzzle-svg');
-const plugEnd = document.getElementById('plug-end');
-const cablePath = document.getElementById('cable-path');
-const socket = document.getElementById('socket');
-// Signal Tuning Puzzle
-const signalTuningOverlay = document.getElementById('signal-tuning-overlay');
-const freqSlider = document.getElementById('frequency-slider');
-const ampSlider = document.getElementById('amplitude-slider');
-const phaseSlider = document.getElementById('phase-slider');
-const targetWavePath = document.getElementById('target-wave');
-const userWavePath = document.getElementById('user-wave');
-
-
-// --- GAME STATE VARIABLES ---
 let foundClues = [];
-let isDragging = false;
-let animationFrameId; // To control the animation loop
-let time = 0; // A counter to make the waves move
+let animationFrameId; let time = 0;
 
-
-// --- GAME STATE LOGIC ---
+// --- INITIALIZATION ---
 window.onload = () => {
-    clue1.textContent = CLUE_1_TEXT;
-    clue2.textContent = CLUE_2_TEXT;
-    initializeCablePuzzle();
-    // Add event listeners for sliders here
-    freqSlider.addEventListener('input', checkWaveMatch);
-    ampSlider.addEventListener('input', checkWaveMatch);
-    phaseSlider.addEventListener('input', checkWaveMatch);
-
-    setTimeout(() => {
-        if (body.classList.contains('state-pristine')) {
-            body.className = 'state-broken';
-        }
+    // MOVED the breakdown sequence to the top to ensure it always fires.
+    setTimeout(() => { 
+        if (body.classList.contains('state-pristine')) { 
+            body.className = 'state-broken'; 
+        } 
     }, 2000);
+
+    // Initialize all puzzles after setting the breakdown timer.
+    initializePowerPuzzle();
+    initializeCablePuzzle();
+    initializeTuningPuzzle();
+    initializeHackingPuzzle();
 };
 
+// --- SUCCESS ANIMATION ---
+function showSuccessAnimation(message, nextStateCallback) {
+    const successOverlay = document.getElementById('success-overlay');
+    const successText = document.getElementById('success-text');
+    successText.innerHTML = message;
+    successOverlay.classList.add('visible');
+    setTimeout(() => { 
+        successOverlay.classList.remove('visible'); 
+        nextStateCallback(); 
+    }, 2000);
+}
 
 // --- PUZZLE 1: POWER FUSE ---
-fuseBox.addEventListener('click', () => {
-    if (body.classList.contains('state-broken')) {
-        body.className = 'state-power-on';
-        collectClue(clue1, CLUE_1_TEXT);
-    }
-});
-
+function initializePowerPuzzle() { 
+    const fuseBox = document.getElementById('fuse-box'); 
+    const clue1 = document.getElementById('clue-1'); 
+    clue1.textContent = CLUE_1_TEXT; 
+    fuseBox.addEventListener('click', () => { 
+        if (body.classList.contains('state-broken')) { 
+            showSuccessAnimation("[ POWER GRID: ONLINE ]", () => { 
+                body.className = 'state-power-on'; 
+                collectClue(clue1, CLUE_1_TEXT); 
+            }); 
+        } 
+    }); 
+}
 
 // --- PUZZLE 2: SVG CABLE LOGIC ---
-function initializeCablePuzzle() { /* ... no changes ... */ }
-function startDrag(e) { e.preventDefault(); isDragging = true; plugEnd.style.cursor = 'grabbing'; }
-function drag(e) { /* ... no changes ... */ }
-function endDrag(e) {
-    if (isDragging) {
-        isDragging = false;
-        plugEnd.style.cursor = 'grab';
-        if (isOverSocket(getMousePosition(e))) {
-            console.log("Display signal established.");
-            plugEnd.style.display = 'none';
-            socket.classList.add('active');
-            const socketRect = socket.getBBox();
-            updateCablePath(150, 600, socketRect.x + socketRect.width / 2, socketRect.y + socketRect.height / 2);
-            setTimeout(() => {
-                body.className = 'state-tuning';
-                signalTuningOverlay.style.display = 'flex';
-                // START the wave animation when the puzzle becomes visible
-                startWaveAnimation();
-            }, 500);
-        } else {
-            initializeCablePuzzle();
-        }
-    }
-}
-// Unchanged cable logic functions from previous steps...
-function initializeCablePuzzle() { const startX = 150, startY = 600; const endX = 200, endY = 200; plugEnd.setAttribute('transform', `translate(${endX}, ${endY})`); updateCablePath(startX, startY, endX, endY); plugEnd.addEventListener('mousedown', startDrag); svg.addEventListener('mousemove', drag); svg.addEventListener('mouseup', endDrag); plugEnd.addEventListener('touchstart', startDrag); svg.addEventListener('touchmove', drag); svg.addEventListener('touchend', endDrag); }
-function updateCablePath(startX, startY, endX, endY) { const controlX = (startX + endX) / 2; const controlY = startY; cablePath.setAttribute('d', `M ${startX} ${startY} Q ${controlX} ${controlY} ${endX} ${endY}`); }
-function getMousePosition(e) { const CTM = svg.getScreenCTM(); const clientX = e.clientX || (e.changedTouches && e.changedTouches[0].clientX); const clientY = e.clientY || (e.changedTouches && e.changedTouches[0].clientY); return { x: (clientX - CTM.e) / CTM.a, y: (clientY - CTM.f) / CTM.d }; }
-function isOverSocket(coords) { const socketRect = socket.getBBox(); return coords.x > socketRect.x && coords.x < socketRect.x + socketRect.width && coords.y > socketRect.y && coords.y < socketRect.y + socketRect.height; }
-
-
-// --- NEW PUZZLE 3: ANIMATED SIGNAL TUNING LOGIC ---
-function startWaveAnimation() {
-    // This function creates a continuous animation loop
-    function animate() {
-        time += 0.5; // This makes the wave move
-        
-        // Redraw the target wave on each frame
-        drawWave(targetWavePath, TARGET_WAVEFORM.frequency, TARGET_WAVEFORM.amplitude, TARGET_WAVEFORM.phase, time);
-        
-        // Redraw the user's wave on each frame with current slider values
-        drawWave(userWavePath, freqSlider.value, ampSlider.value, phaseSlider.value, time);
-        
-        animationFrameId = requestAnimationFrame(animate);
-    }
-    animate(); // Start the loop
-}
-
-function drawWave(pathElement, freq, amp, phase, timeOffset) {
-    const width = 800; const height = 200;
-    const frequency = freq / 10;
-    const amplitude = amp / 100 * (height / 2 - 10);
-    const phaseShift = phase / 100 * width;
-
-    let pathData = `M 0 ${height / 2}`;
-    for (let x = 0; x < width; x++) {
-        // The "timeOffset" is added here to create the scrolling animation
-        const y = Math.sin((x + phaseShift + timeOffset) * frequency / 100) * amplitude + height / 2;
-        pathData += ` L ${x} ${y}`;
-    }
-    pathElement.setAttribute('d', pathData);
-}
-
-function checkWaveMatch() {
-    const freqDiff = Math.abs(freqSlider.value - TARGET_WAVEFORM.frequency);
-    const ampDiff = Math.abs(ampSlider.value - TARGET_WAVEFORM.amplitude);
-    const phaseDiff = Math.abs(phaseSlider.value - TARGET_WAVEFORM.phase);
+function initializeCablePuzzle() {
+    const svg = document.getElementById('cable-puzzle-svg');
+    const plugEnd = document.getElementById('plug-end');
+    const cablePath = document.getElementById('cable-path');
+    const socket = document.getElementById('socket');
+    const clue2 = document.getElementById('clue-2');
+    clue2.textContent = CLUE_2_TEXT;
     
-    // Check if all sliders are within the tolerance
-    if (freqDiff <= TARGET_WAVEFORM.tolerance && ampDiff <= TARGET_WAVEFORM.tolerance && phaseDiff <= TARGET_WAVEFORM.tolerance) {
-        console.log("Signal locked! Proceeding to reboot.");
-        
-        // Stop the animation to save resources
-        cancelAnimationFrame(animationFrameId);
-        
-        // "Snap" the user wave to the target wave perfectly
-        drawWave(userWavePath, TARGET_WAVEFORM.frequency, TARGET_WAVEFORM.amplitude, TARGET_WAVEFORM.phase, time);
-        userWavePath.style.stroke = '#2ecc71'; // Turn it solid green
-        
-        // Proceed to the next level after a short delay
-        setTimeout(() => {
-            signalTuningOverlay.style.display = 'none';
-            body.className = 'state-rebooting';
-        }, 1500); // 1.5-second delay to appreciate the match
+    const startX = 150, startY = 600, initialEndX = 200, initialEndY = 200;
+    
+    const resetPlug = () => {
+        plugEnd.setAttribute('transform', `translate(${initialEndX}, ${initialEndY})`);
+        updateCablePath(cablePath, startX, startY, initialEndX, initialEndY);
+        plugEnd.style.pointerEvents = 'all';
+    };
+    resetPlug();
+    
+    function startDrag(e) {
+        e.preventDefault();
+        function move(e) {
+            const coords = getMousePosition(svg, e);
+            plugEnd.setAttribute('transform', `translate(${coords.x}, ${coords.y})`);
+            updateCablePath(cablePath, startX, startY, coords.x, coords.y);
+            if (isOverSocket(socket, coords)) { socket.classList.add('active'); } 
+            else { socket.classList.remove('active'); }
+        }
+        function end(e) {
+            svg.removeEventListener('mousemove', move);
+            svg.removeEventListener('touchmove', move);
+            svg.removeEventListener('mouseup', end);
+            svg.removeEventListener('touchend', end);
+            
+            const finalCoords = getMousePosition(svg, e);
+            
+            if (isOverSocket(socket, finalCoords)) {
+                const socketRect = socket.getBBox();
+                const socketCenterX = socketRect.x + socketRect.width / 2;
+                const socketCenterY = socketRect.y + socketRect.height / 2;
+                plugEnd.setAttribute('transform', `translate(${socketCenterX}, ${socketCenterY})`);
+                updateCablePath(cablePath, startX, startY, socketCenterX, socketCenterY);
+                socket.classList.add('active');
+                plugEnd.style.pointerEvents = 'none';
+                showSuccessAnimation("[ VIDEO SIGNAL ACQUIRED ]", () => {
+                    body.className = 'state-tuning';
+                    document.getElementById('signal-tuning-overlay').style.display = 'flex';
+                    startWaveAnimation();
+                });
+            } else {
+                resetPlug();
+            }
+        }
+        svg.addEventListener('mousemove', move);
+        svg.addEventListener('touchmove', move);
+        svg.addEventListener('mouseup', end);
+        svg.addEventListener('touchend', end);
     }
+    
+    plugEnd.addEventListener('mousedown', startDrag);
+    plugEnd.addEventListener('touchstart', startDrag);
+    clue2.addEventListener('click', () => collectClue(clue2, CLUE_2_TEXT));
 }
 
-
-// --- CLUE LOGIC ---
-clue2.addEventListener('click', () => collectClue(clue2, CLUE_2_TEXT));
-function collectClue(clueElement, clueValue) {
-    if (clueElement.classList.contains('found')) return;
-    clueElement.classList.add('found');
-    foundClues.push(clueValue);
-    collectedCluesDisplay.textContent = `CLUES FOUND: ${foundClues.join(' ')}`;
+// --- PUZZLE 3: SIGNAL TUNING ---
+function initializeTuningPuzzle() { 
+    const freqSlider = document.getElementById('frequency-slider'); 
+    const checkMatch = () => { 
+        const freqDiff = Math.abs(freqSlider.value - TARGET_FREQUENCY.value); 
+        if (freqDiff <= TARGET_FREQUENCY.tolerance) { 
+            freqSlider.removeEventListener('input', checkMatch); 
+            cancelAnimationFrame(animationFrameId); 
+            document.getElementById('user-wave').style.stroke = 'var(--pip-boy-green)'; 
+            showSuccessAnimation("[ SIGNAL STABLE ]", () => { 
+                document.getElementById('signal-tuning-overlay').style.display = 'none'; 
+                body.className = 'state-rebooting'; 
+            }); 
+        } 
+    }; 
+    freqSlider.addEventListener('input', checkMatch); 
 }
 
+// --- PUZZLE 4: HACKING MINIGAME ---
+function initializeHackingPuzzle() { 
+    const terminal = document.getElementById('hacking-terminal'); 
+    const attemptsText = document.getElementById('attempts-text'); 
+    let attemptsLeft = 4; 
 
-// --- PUZZLE 4: REBOOT PASSWORD ---
-rebootButton.addEventListener('click', checkPassword);
-passwordInput.addEventListener('keyup', (e) => { if (e.key === 'Enter') checkPassword(); });
-function checkPassword() {
-    if (passwordInput.value.toLowerCase() === REBOOT_PASSWORD.toLowerCase()) {
-        rebootFeedback.textContent = "ACCESS GRANTED. SYSTEM REPAIRED.";
-        finalRevealOverlay.style.display = 'flex';
-        setTimeout(() => {
-            finalRevealOverlay.style.display = 'none';
-            body.className = 'state-fixed';
-        }, 4000);
-    } else {
-        rebootFeedback.textContent = "ACCESS DENIED. INCORRECT PASSWORD.";
-    }
+    // Clear previous options before generating new ones
+    terminal.innerHTML = '';
+    attemptsText.textContent = `ATTEMPTS REMAINING: ${attemptsLeft}`;
+    
+    const shuffledWords = [...HACKING_WORDS].sort(() => 0.5 - Math.random()); 
+    shuffledWords.forEach(word => { 
+        const option = document.createElement('div'); 
+        option.className = 'password-option'; 
+        option.textContent = word; 
+        option.addEventListener('click', handleHackAttempt); 
+        terminal.appendChild(option); 
+    }); 
+
+    function handleHackAttempt(e) { 
+        const clickedWord = e.target.textContent; 
+        if (clickedWord === REBOOT_PASSWORD) { 
+            showSuccessAnimation("[ SECURITY BYPASSED ]", () => { 
+                runRebootSequence(); 
+            }); 
+        } else { 
+            attemptsLeft--; 
+            attemptsText.textContent = `ATTEMPTS REMAINING: ${attemptsLeft}`; 
+            e.target.classList.add('deleted'); 
+            
+            if (attemptsLeft <= 0) { 
+                showSuccessAnimation("[ SYSTEM LOCKOUT ]", () => { 
+                    initializeHackingPuzzle(); // Reset the puzzle
+                }); 
+            } 
+        } 
+    } 
 }
 
-
-// --- HELPER FUNCTION ---
-function createJumbledContent() {
-    const container = document.querySelector('.jumbled-content'); container.innerHTML = '';
-    const imageUrls = ['images/photo1.jpg', 'images/photo2.jpg', 'images/photo3.jpg', 'images.photo4.jpg']; 
-    for (let i = 0; i < 20; i++) {
-        const img = document.createElement('img');
-        img.src = imageUrls[Math.floor(Math.random() * imageUrls.length)];
-        img.style.top = `${Math.random() * 100}%`; img.style.left = `${Math.random() * 100}%`; img.style.transform = `rotate(${Math.random() * 360}deg)`;
-        container.appendChild(img);
-    }
+// --- FINAL SEQUENCES & HELPERS ---
+async function runRebootSequence() { 
+    const rebootOverlay = document.getElementById('reboot-overlay'); 
+    rebootOverlay.innerHTML = `<div id="reboot-sequence" class="terminal-text"></div>`; 
+    const sequenceText = document.getElementById('reboot-sequence'); 
+    const lines = ["PASSCODE VERIFIED...", "DEFRAGMENTING MEMORY CORE...", "CALIBRATING EMOTION MODULES...", "LOADING BIRTHDAY PROTOCOL...", "EXECUTE: OPERATION BEST DAD"]; 
+    for (const line of lines) { 
+        sequenceText.innerHTML += `<p>${line}</p>`; 
+        await new Promise(resolve => setTimeout(resolve, 700)); 
+    } 
+    await new Promise(resolve => setTimeout(resolve, 1000)); 
+    rebootOverlay.style.display = 'none'; 
+    document.getElementById('final-reveal-overlay').style.display = 'flex'; 
+    setTimeout(() => { 
+        document.getElementById('final-reveal-overlay').style.display = 'none'; 
+        body.className = 'state-fixed'; 
+    }, 4000); 
+}
+function collectClue(clueElement, clueValue) { 
+    const collectedCluesDisplay = document.querySelector('#reboot-overlay #collected-clues'); 
+    if (clueElement.classList.contains('found') || !collectedCluesDisplay) return; 
+    clueElement.classList.add('found'); 
+    foundClues.push(clueValue); 
+    collectedCluesDisplay.textContent = `CLUES FOUND: ${foundClues.join(' ')}`; 
+}
+function startWaveAnimation() { 
+    const targetWave = document.getElementById('target-wave'); 
+    const userWave = document.getElementById('user-wave'); 
+    const freq = document.getElementById('frequency-slider'); 
+    function animate() { 
+        time += 0.5; 
+        drawWave(targetWave, TARGET_FREQUENCY.value, 75, 50, time); 
+        drawWave(userWave, freq.value, 75, 50, time); 
+        animationFrameId = requestAnimationFrame(animate); 
+    } 
+    animate(); 
+}
+function drawWave(path, freq, amp, phase, time) { 
+    const w = 800, h = 200; 
+    const f = freq / 10, a = amp / 100 * (h / 2 - 5), p = phase / 100 * w; 
+    let d = `M 0 ${h/2}`; 
+    for (let x = 0; x < w; x++) { 
+        d += ` L ${x} ${Math.sin((x + p + time) * f / 100) * a + h/2}`; 
+    } 
+    path.setAttribute('d', d); 
+}
+function updateCablePath(path, sx, sy, ex, ey) { 
+    const cx = (sx + ex) / 2, cy = sy; 
+    path.setAttribute('d', `M ${sx} ${sy} Q ${cx} ${cy} ${ex} ${ey}`); 
+}
+function getMousePosition(svg, e) { 
+    const ctm = svg.getScreenCTM(); 
+    const clientX = e.clientX || (e.changedTouches && e.changedTouches[0].clientX); 
+    const clientY = e.clientY || (e.changedTouches && e.changedTouches[0].clientY); 
+    return { x: (clientX - ctm.e) / ctm.a, y: (clientY - ctm.f) / ctm.d }; 
+}
+function isOverSocket(socket, coords) { 
+    const rect = socket.getBBox(); 
+    return coords.x > rect.x && coords.x < rect.x + rect.width && coords.y > rect.y && coords.y < rect.y + rect.y + rect.height; 
 }
