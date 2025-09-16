@@ -3,7 +3,7 @@
 
 :root {
     --pip-boy-green: #27f877;
-    --pip-boy-green-dark: #195228;
+    --pip-boy-green-dark: #206633;
     --pip-boy-bg: #151a14;
     --pip-boy-font: 'VT323', monospace;
 }
@@ -353,4 +353,53 @@ input[type="range"]::-webkit-slider-thumb {
     10% { opacity: 1; } 
     80% { opacity: 1; } 
     100% { opacity: 0; } 
+}
+/* === S.P.E.C.I.A.L. STATS === */
+
+.stats-profile {
+    margin-top: 40px;
+}
+
+.stats-container {
+    border: 2px solid var(--pip-boy-green-dark);
+    padding: 15px;
+    margin-top: 15px;
+}
+
+.stat-item {
+    display: grid;
+    grid-template-columns: 1fr 2fr 30px; /* Title | Bar | Value */
+    align-items: center;
+    gap: 10px;
+    font-size: 1.5rem;
+    margin-bottom: 5px;
+}
+
+.stat-title {
+    text-align: right;
+}
+
+.stat-bar {
+    height: 20px;
+    background: var(--pip-boy-green-dark);
+    border: 2px solid var(--pip-boy-green-dark);
+    padding: 2px;
+}
+
+.stat-fill {
+    height: 100%;
+    background: var(--pip-boy-green);
+    box-shadow: 0 0 5px var(--pip-boy-green);
+}
+
+.stat-value {
+    text-align: right;
+}
+
+.stat-description {
+    font-size: 1.2rem;
+    color: var(--pip-boy-green-dark);
+    text-shadow: none;
+    padding-left: 10px;
+    margin-bottom: 20px;
 }
