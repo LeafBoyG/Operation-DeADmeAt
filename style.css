@@ -21,7 +21,6 @@ body { background: #000; font-family: var(--pip-boy-font); color: var(--pip-boy-
 .game-overlay { display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 100; align-items: center; justify-content: center; flex-direction: column; }
 .state-pristine, .state-fixed { background: var(--pip-boy-bg); }
 .state-broken, .state-power-on, .state-tuning, .state-memory, .state-rebooting { background: #000; }
-/* Note: state-coolant is no longer used */
 .state-broken #power-outage-overlay, .state-power-on #no-signal-overlay, .state-tuning #signal-tuning-overlay, .state-memory #memory-puzzle-overlay, .state-rebooting #reboot-overlay { display: flex; }
 
 /* === "FIXED" WEBSITE STYLES === */
@@ -59,7 +58,7 @@ cite { display: block; margin-top: 10px; text-align: right; }
 #socket.active .port { fill: var(--pip-boy-green); }
 #plug-end { transition: transform 0.3s ease; }
 #plug-end rect { fill: var(--pip-boy-green); }
-#tuning-monitor { width: 80%; max-width: 800px; height: 150px; border: 2px solid var(--pip-boy-green); }
+#tuning-monitor { width: 90%; max-width: 800px; height: 150px; border: 2px solid var(--pip-boy-green); }
 #waveform-svg path { fill: none; stroke-width: 2; }
 #target-wave { stroke: var(--pip-boy-green-dark); }
 #user-wave { stroke: var(--pip-boy-green); }
@@ -86,3 +85,73 @@ input[type="range"]::-webkit-slider-thumb { -webkit-appearance: none; appearance
 /* === ANIMATIONS === */
 @keyframes text-flicker { 0% { opacity: 1; } 50% { opacity: 0.8; } 100% { opacity: 1; } }
 @keyframes flashAndFade { 0% { opacity: 0; } 10% { opacity: 1; } 80% { opacity: 1; } 100% { opacity: 0; } }
+
+
+/* ==================================
+==== NEW: MOBILE STYLES ====
+==================================
+*/
+@media (max-width: 768px) {
+    /* Adjust the bezel to fit phone screens better */
+    .screen-bezel {
+        top: 10px; left: 10px; right: 10px; bottom: 10px;
+        width: auto; height: auto;
+        border-radius: 20px;
+        padding: 15px;
+    }
+    .screen-glow { border-radius: 20px; }
+    .bezel-text { font-size: 1rem; }
+    .top-left { left: 20px; } .top-right { right: 20px; } .bottom-left { left: 20px; } .bottom-right { right: 20px; }
+
+    /* Make text more readable */
+    .terminal-text {
+        font-size: 1.2rem;
+        padding: 15px;
+    }
+    header, .stats-profile h2, .message-wall h2 { font-size: 1.2rem; }
+
+    /* Redesign the stats section to be single-column */
+    .stat-item {
+        grid-template-columns: 1fr; /* Stack everything */
+        text-align: center;
+        margin-bottom: 20px;
+    }
+    .stat-title {
+        text-align: center;
+        font-size: 1.2rem;
+    }
+    .stat-bar {
+        height: 15px;
+        margin: 5px 0;
+    }
+    .stat-description {
+        font-size: 1rem;
+        margin-bottom: 10px;
+    }
+
+    /* Adjust puzzle sizes */
+    #memory-grid {
+        grid-template-columns: repeat(3, 60px);
+    }
+    .memory-block {
+        width: 60px; height: 60px;
+    }
+    #tuning-controls {
+        flex-direction: column;
+        gap: 15px;
+    }
+
+    /* Make hacking terminal more compact */
+    #hacking-terminal {
+        height: 250px;
+        gap: 10px 20px;
+    }
+    .password-option {
+        font-size: 1.2rem;
+    }
+
+    /* Make finale title bigger on narrow screens */
+    .final-title {
+        font-size: 25vw;
+    }
+}
